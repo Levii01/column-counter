@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 function syntax_error {
   echo "Błąd składni"
 }
