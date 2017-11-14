@@ -11,6 +11,16 @@ function build_error_with {
   exit 2
 }
 
+function awk_counter {
+  sum_column=`awk -v x=$1 '{y+=$x} END {print y}' $file`
+  # sumowanie kolumny do jednej zmiennej
+  echo $sum_column
+
+  if [ $sum_result_flag ]; then
+    let result_columns+=$sum_column
+  fi
+}
+
 if [[ "$#" = 0 ]]; then
   general_error_with "Nie podałeś żadnego argumentu"
 fi
@@ -39,28 +49,17 @@ if [ ! -r $file ]; then
   build_error_with "Brak odpowiednich praw dostępu do pliku"
 fi
 
-if [ $# -eq 0 ]; then
-  if [ $sum_result_flag ] ; then
-    awk '{for(i=1;i<=NF;i++){sum[i]+=$i}} END {for(i=1;i<=NF;i++){print wyn+=sum[i]} print wyn}' $file
-    # sumowanie kazdej liczby w kolumnie, kolejna petla tworzy wynikowa kolumne liczb i ja wypisuje, sumuje i wyswietla jej wartosc.
-    exit 0
-  fi
-
-  awk '{for(i=1;i<=NF;i++){sum[i]+=$i}} END {for(i=1;i<=NF;i++){print sum[i]}}' $file
-  exit 0
+if [ $# -eq 0 ]; then # gdy nie podano żadnych kolumn
+  awk_counter 1
 fi
 
 while [ $# -gt 0 ]; do
-  sum_column=`awk -v x=$1 '{y+=$x} END {print y}' $file`
-  # sumowanie kolumny do jednej zmiennej
-  echo $sum_column
-
-  if [ $sum_result_flag ]; then
-  	let result_columns+=$sum_column
-  fi
+  awk_counter $1
   shift
 done
 
 if [ $sum_result_flag ]; then
   echo $result_columns
 fi
+
+exit 0
